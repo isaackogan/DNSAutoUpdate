@@ -172,6 +172,7 @@ def main(ip_version, record_type, args):
 
 if __name__ == '__main__':
     logging.root.setLevel(logging.INFO)
+    print("Go for launch!")
 
     # Parse Config
     args = setup_parser()
