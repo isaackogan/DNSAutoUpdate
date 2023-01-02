@@ -106,7 +106,6 @@ def get_config(config_file):
     try:
         with open(config_file, 'r', encoding='UTF-8') as stream:
             config = yaml.safe_load(stream)
-        print(f'Config:\n{config}')
         return config
     except FileNotFoundError:
         logging.critical(f'Could not find config file at {config_file} - exiting...')
