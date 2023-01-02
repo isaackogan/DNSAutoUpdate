@@ -165,7 +165,7 @@ def main(ip_version, record_type, args):
                 update_record(config, current_ip_address, record_type, zone_identifier, record_identifier)
                 write_ip(current_ip_address, ip_version)
             else:
-                logging.info(f'Current IPv{ip_version} address "{current_ip_address}" is equal to IP of DNS record "{config["record_name"]}" in zone "{config["zone_name"]}" already: "{record_ip}". Exiting...')
+                logging.info(f'Current IPv{ip_version} address "{current_ip_address}" is equal to IP of DNS record "{config["record_name"]}" in zone "{config["zone_name"]}" already: "{record_ip}"')
         else:
             logging.info(f'IPv{ip_version} address has not changed. Exiting...')
 
