@@ -172,7 +172,6 @@ def main(ip_version, record_type, args):
 
 if __name__ == '__main__':
     logging.root.setLevel(logging.INFO)
-    logging.info("Starting Check @ " + str(datetime.datetime.utcnow()))
 
     # Parse Config
     args = setup_parser()
@@ -180,5 +179,6 @@ if __name__ == '__main__':
 
     # Change IPv4 A-Record
     while True:
+        logging.info("Starting Check @ " + str(datetime.datetime.utcnow()))
         main(4, 'A', args)
         time.sleep(3600)  # Every hour
