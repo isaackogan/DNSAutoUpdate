@@ -36,10 +36,10 @@ def setup_parser():
 def setup_logging(args):
     if args.log_level not in log_levels:
         logging.basicConfig(filename=args.log_file, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_levels['info'])
-        logging.warning(f'Specified log level "{args.log_level}" is not allowed, see output of -h for possible values')
+        print(f'Specified log level "{args.log_level}" is not allowed, see output of -h for possible values')
     else:
         logging.basicConfig(filename=args.log_file, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=log_levels[args.log_level])
-        logging.debug(f'Set log level "{args.log_level}"')
+        print(f'Set log level "{args.log_level}"')
 
 
 def get_ip(version, args):
@@ -96,17 +96,17 @@ def check_ip(current_ip_address, version):
 def check_config(config, config_file):
     for required_config_key in required_config_keys:
         if not required_config_key in config:
-            logging.critical(f'Required config key "{required_config_key}" missing in config "{config_file}"! Exiting...')
+            print(f'Required config key "{required_config_key}" missing in config "{config_file}"! Exiting...')
             sys.exit(1)
     if config["record_name"].endswith(config["zone_name"]):
-        logging.warning(f'record_name "{config["record_name"]}" in config "{config_file}" contains zone_name "{config["zone_name"]}". This is not necessary and should be removed.')
+        print(f'record_name "{config["record_name"]}" in config "{config_file}" contains zone_name "{config["zone_name"]}". This is not necessary and should be removed.')
         config["record_name"] = re.sub(f'.{config["zone_name"]}', '', config["record_name"])
 
 def get_config(config_file):
     try:
         with open(config_file, 'r', encoding='UTF-8') as stream:
             config = yaml.safe_load(stream)
-        logging.debug(f'Config:\n{config}')
+        print(f'Config:\n{config}')
         return config
     except FileNotFoundError:
         logging.critical(f'Could not find config file at {config_file} - exiting...')
@@ -134,14 +134,14 @@ def update_record(config, ip, record_type, zone_identifier, record_identifier):
     request_successful, response = make_request('put', f'https://api.cloudflare.com/client/v4/zones/{zone_identifier}/dns_records/{record_identifier}', headers={"Authorization": f"Bearer {config['edit_token']}", "Content-Type": "application/json"}, data=f'{{"id": "{zone_identifier}", "type": "{record_type}", "name": "{config["record_name"]}","content": "{ip}"}}')
 
     if request_successful:
-        logging.info(f'DNS {record_type} record update succeeded, IP changed to: "{ip}"')
+        print(f'DNS {record_type} record update succeeded, IP changed to: "{ip}"')
     else:
         logging.critical(f'DNS {record_type} record update failed, dumping API response:\n{response.content}')
         sys.exit(1)
 
 
 def write_ip(ip, version):
-    logging.debug(f'Writing IPv{version} address to file: {ip}')
+    print(f'Writing IPv{version} address to file: {ip}')
     with open(f'cloudflare_update_record_ip{version}.txt', 'w', encoding='UTF-8') as f:
         f.write(ip)
 
@@ -161,17 +161,16 @@ def main(ip_version, record_type, args):
                 update_record(config, current_ip_address, record_type, zone_identifier, record_identifier)
                 write_ip(current_ip_address, ip_version)
             elif current_ip_address == record_ip and args.force:
-                logging.warning(f'Force parameter is set. Setting IP address "{current_ip_address}" even though it is equal to IP of DNS record "{config["record_name"]}" in zone "{config["zone_name"]}" already.')
+                print(f'Force parameter is set. Setting IP address "{current_ip_address}" even though it is equal to IP of DNS record "{config["record_name"]}" in zone "{config["zone_name"]}" already.')
                 update_record(config, current_ip_address, record_type, zone_identifier, record_identifier)
                 write_ip(current_ip_address, ip_version)
             else:
-                logging.info(f'Current IPv{ip_version} address "{current_ip_address}" is equal to IP of DNS record "{config["record_name"]}" in zone "{config["zone_name"]}" already: "{record_ip}"')
+                print(f'Current IPv{ip_version} address "{current_ip_address}" is equal to IP of DNS record "{config["record_name"]}" in zone "{config["zone_name"]}" already: "{record_ip}"')
         else:
-            logging.info(f'IPv{ip_version} address has not changed. Exiting...')
+            print(f'IPv{ip_version} address has not changed. Exiting...')
 
 
 if __name__ == '__main__':
-    logging.root.setLevel(logging.INFO)
     print("Go for launch!")
 
     # Parse Config
@@ -180,6 +179,6 @@ if __name__ == '__main__':
 
     # Change IPv4 A-Record
     while True:
-        logging.info("Starting Check @ " + str(datetime.datetime.utcnow()))
+        print("Starting Check @ " + str(datetime.datetime.utcnow()))
         main(4, 'A', args)
         time.sleep(3600)  # Every hour
